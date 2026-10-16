@@ -17,3 +17,23 @@ async def test_stdio_initialization_lists_compact_tools():
             result = await session.call_tool('browser_open', {'url':'invalid'})
             assert result.structuredContent['status'] == 'error'
             assert all(c.type == 'text' for c in result.content)
+
+
+@pytest.mark.asyncio
+async def test_npx_cli_launcher_initializes_mcp_server():
+    import glob, shutil
+    nvm_nodes = sorted(glob.glob(os.path.expanduser('~/.nvm/versions/node/*/bin/node')))
+    node = shutil.which('node') or (nvm_nodes[-1] if nvm_nodes else None)
+    if not node or not os.path.exists(node):
+        pytest.skip('node not installed')
+    params = StdioServerParameters(
+        command=node,
+        args=[os.path.abspath('bin/cli.mjs')],
+        env={**os.environ,'D1_PROVIDER':'ollama','D1_MODEL_NAME':'d1:3b'},
+    )
+    async with stdio_client(params) as (read,write):
+        async with ClientSession(read,write) as session:
+            init = await asyncio.wait_for(session.initialize(),10)
+            assert init.serverInfo.name == 'Flash computer use'
+            tools = await session.list_tools()
+            assert len(tools.tools) == 15

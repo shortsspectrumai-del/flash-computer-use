@@ -20,18 +20,21 @@ def platform_info(system=None,environ=None):
                    'Requires an unlocked interactive desktop; protected/elevated windows may need matching privileges.'}
 
 
-def mcp_config(python=None,ollama_url='http://localhost:11434'):
-    return {'mcpServers':{'Flash computer use':{'command':python or sys.executable,'args':['-m','d1_computer_use_mcp.server'],
+def mcp_config(python=None,ollama_url='http://localhost:11434',use_npx=False):
+    cmd='npx' if use_npx else (python or sys.executable)
+    args=['-y','github:shortsspectrumai-del/flash-computer-use'] if use_npx else ['-m','d1_computer_use_mcp.server']
+    return {'mcpServers':{'Flash computer use':{'command':cmd,'args':args,
             'env':{'D1_PROVIDER':'ollama','D1_MODEL_NAME':'d1:3b','D1_OLLAMA_BASE_URL':ollama_url,
                    'D1_BROWSER_STRATEGY':'hybrid','D1_DESKTOP_STRATEGY':'hybrid','D1_IMAGE_MAX_SIDE':'768'}}}}
 
 
 def configure():
-    parser=argparse.ArgumentParser(description='Generate portable MCP JSON for this Python environment')
+    parser=argparse.ArgumentParser(description='Generate portable MCP JSON for this Python environment or npx')
     parser.add_argument('--ollama-url',default='http://localhost:11434')
+    parser.add_argument('--npx',action='store_true',help='Generate npx-based MCP configuration')
     parser.add_argument('--output',type=Path)
     args=parser.parse_args()
-    text=json.dumps(mcp_config(ollama_url=args.ollama_url),indent=2)+'\n'
+    text=json.dumps(mcp_config(ollama_url=args.ollama_url,use_npx=args.npx),indent=2)+'\n'
     if args.output:
         args.output.write_text(text)
     else:

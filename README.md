@@ -4,7 +4,7 @@
 [![Python 3.11+](https://img.shields.io/badge/Python-3.11%2B-blue.svg)](https://www.python.org/)
 [![MCP Compatible](https://img.shields.io/badge/MCP-Model%20Context%20Protocol-green.svg)](https://modelcontextprotocol.io/)
 [![OS: Linux | Windows | macOS](https://img.shields.io/badge/OS-Linux%20%7C%20Windows%20%7C%20macOS-informational.svg)](#8-cross-platform-support-linux-windows-macos)
-[![Tests: 68 Passed](https://img.shields.io/badge/Tests-68%20passed-brightgreen.svg)](#9-speed--accuracy-benchmarks)
+[![Tests: 69 Passed](https://img.shields.io/badge/Tests-69%20passed-brightgreen.svg)](#1-speed--accuracy-benchmarks)
 
 **Flash computer use** is a high-speed, precision-engineered **Model Context Protocol (MCP)** server in Python for controlling both **web browsers** (Playwright) and the **physical OS desktop** (Linux X11, Windows, macOS).
 
@@ -91,9 +91,28 @@ D1_BROWSER_STRATEGY=vision D1_BENCH_RUNS=1 .venv/bin/python benchmarks/browser_s
 
 ---
 
-## 3. Step-by-Step Installation
+## 3. Quick Start & Installation
 
-### Linux / macOS
+### Option A: Zero-Clone Install via `npx` (Recommended)
+
+You can run or register **Flash computer use** directly from GitHub using **`npx`**—it automatically bootstraps an isolated Python virtual environment (`~/.cache/flash-computer-use/venv` or `%LOCALAPPDATA%\flash-computer-use\venv`) and installs Playwright Chromium on first launch:
+
+```bash
+# Run environment diagnostics via npx
+npx -y github:shortsspectrumai-del/flash-computer-use doctor
+
+# Generate portable MCP JSON config via npx
+npx -y github:shortsspectrumai-del/flash-computer-use config --npx
+
+# Start the stdio MCP server directly via npx
+npx -y github:shortsspectrumai-del/flash-computer-use
+```
+
+---
+
+### Option B: Manual Clone & Local Virtual Environment
+
+#### Linux / macOS
 
 ```bash
 git clone https://github.com/shortsspectrumai-del/flash-computer-use.git
@@ -107,7 +126,7 @@ uv pip install -e '.[dev]'
 PLAYWRIGHT_BROWSERS_PATH=.runtime/playwright .venv/bin/python -m playwright install chromium
 ```
 
-### Windows (PowerShell)
+#### Windows (PowerShell)
 
 ```powershell
 git clone https://github.com/shortsspectrumai-del/flash-computer-use.git
@@ -130,33 +149,19 @@ Pull the `d1:3b` decision model and verify your environment:
 ollama pull d1:3b
 
 # Check OS desktop capabilities, accessibility backend, and Python dependencies
-.venv/bin/flash-doctor
+npx -y github:shortsspectrumai-del/flash-computer-use doctor
 
 # Verify D1 decision inference (binary noul, choice, score) on a synthetic image
-D1_PROVIDER=ollama D1_MODEL_NAME=d1:3b .venv/bin/flash-check --inference
+D1_PROVIDER=ollama D1_MODEL_NAME=d1:3b npx -y github:shortsspectrumai-del/flash-computer-use check --inference
 ```
 
 ---
 
-## 5. MCP Client Configuration (Cursor, Claude, Codex, Antigravity)
-
-### Auto-Generate Portable MCP JSON
-
-Generate a ready-to-use JSON configuration pointing to your current Python environment:
-
-```bash
-.venv/bin/flash-config --ollama-url http://localhost:11434
-```
-
-Save directly to a file:
-
-```bash
-.venv/bin/flash-config --ollama-url http://localhost:11434 --output mcp.json
-```
-
----
+## 5. MCP Client Configuration (Cursor, Claude, Codex, Antigravity, Pi)
 
 ### A. Cursor / Claude Desktop / Google Antigravity (`mcp.json` / `claude_desktop_config.json`)
+
+#### Using `npx` (Works on Linux, macOS, and Windows without manual cloning)
 
 Add the following block to your client's MCP configuration file (see [`examples/mcp.ollama.json`](examples/mcp.ollama.json)):
 
@@ -164,7 +169,11 @@ Add the following block to your client's MCP configuration file (see [`examples/
 {
   "mcpServers": {
     "Flash computer use": {
-      "command": "/absolute/path/to/flash-computer-use/run-mcp.sh",
+      "command": "npx",
+      "args": [
+        "-y",
+        "github:shortsspectrumai-del/flash-computer-use"
+      ],
       "env": {
         "D1_PROVIDER": "ollama",
         "D1_MODEL_NAME": "d1:3b",
@@ -181,13 +190,13 @@ Add the following block to your client's MCP configuration file (see [`examples/
 }
 ```
 
-*(On **Windows**, set `"command"` to `"C:\\absolute\\path\\to\\flash-computer-use\\run-mcp.cmd"`).*
+*(Or if using a local clone, set `"command": "/absolute/path/to/flash-computer-use/run-mcp.sh"` on Linux/macOS or `"C:\\absolute\\path\\to\\flash-computer-use\\run-mcp.cmd"` on Windows).*
 
 ---
 
 ### B. OpenAI Codex CLI (`~/.codex/config.toml`)
 
-Register via CLI:
+Register via `npx` with a single command:
 
 ```bash
 codex mcp add "Flash computer use" \
@@ -197,15 +206,16 @@ codex mcp add "Flash computer use" \
   --env D1_TIMEOUT_SECONDS=120 \
   --env D1_BROWSER_STRATEGY=hybrid \
   --env D1_DESKTOP_STRATEGY=hybrid \
-  -- '/absolute/path/to/flash-computer-use/run-mcp.sh'
+  -- npx -y github:shortsspectrumai-del/flash-computer-use
 ```
 
 Or copy [`examples/codex.ollama.toml`](examples/codex.ollama.toml) into `~/.codex/config.toml`:
 
 ```toml
 [mcp_servers."Flash computer use"]
-command = "/absolute/path/to/flash-computer-use/run-mcp.sh"
-startup_timeout_sec = 30
+command = "npx"
+args = ["-y", "github:shortsspectrumai-del/flash-computer-use"]
+startup_timeout_sec = 60
 tool_timeout_sec = 120
 
 [mcp_servers."Flash computer use".env]
@@ -216,6 +226,8 @@ D1_TIMEOUT_SECONDS = "120"
 D1_BROWSER_STRATEGY = "hybrid"
 D1_DESKTOP_STRATEGY = "hybrid"
 D1_IMAGE_MAX_SIDE = "768"
+D1_REAL_MOUSE = "true"
+D1_MOUSE_DURATION = "0.04"
 ```
 
 ---
@@ -227,7 +239,23 @@ claude mcp add --transport stdio \
   --env D1_PROVIDER=ollama \
   --env D1_MODEL_NAME=d1:3b \
   --env D1_OLLAMA_BASE_URL=http://localhost:11434 \
-  "Flash computer use" -- '/absolute/path/to/flash-computer-use/run-mcp.sh'
+  "Flash computer use" -- npx -y github:shortsspectrumai-del/flash-computer-use
+```
+
+---
+
+### D. Pi Coding Agent (`~/.pi/agent/mcp.json`)
+
+```bash
+pi mcp add flash-computer-use \
+  --exposure direct \
+  --env D1_PROVIDER=ollama \
+  --env D1_MODEL_NAME=d1:3b \
+  --env D1_OLLAMA_BASE_URL=http://localhost:11434 \
+  --env D1_TIMEOUT_SECONDS=120 \
+  --env D1_BROWSER_STRATEGY=hybrid \
+  --env D1_DESKTOP_STRATEGY=hybrid \
+  -- npx -y github:shortsspectrumai-del/flash-computer-use
 ```
 
 ---

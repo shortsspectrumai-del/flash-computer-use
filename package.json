@@ -1,0 +1,55 @@
+{
+  "name": "flash-computer-use",
+  "version": "0.1.0",
+  "description": "Ultra-fast hybrid Browser & Desktop Computer-Use MCP Server (DOM + Native OS Accessibility + LiquidAI D1 Vision) with human-like physical mouse movement and Paint/canvas drawing.",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "flash-computer-use": "./bin/cli.mjs"
+  },
+  "scripts": {
+    "start": "node ./bin/cli.mjs",
+    "doctor": "node ./bin/cli.mjs doctor",
+    "config": "node ./bin/cli.mjs config",
+    "check": "node ./bin/cli.mjs check"
+  },
+  "files": [
+    "bin/",
+    "d1_computer_use_mcp/",
+    "pyproject.toml",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shortsspectrumai-del/flash-computer-use.git"
+  },
+  "homepage": "https://github.com/shortsspectrumai-del/flash-computer-use#readme",
+  "bugs": {
+    "url": "https://github.com/shortsspectrumai-del/flash-computer-use/issues"
+  },
+  "keywords": [
+    "mcp",
+    "mcp-server",
+    "model-context-protocol",
+    "computer-use",
+    "gui-agent",
+    "browser-automation",
+    "desktop-automation",
+    "ai-agent",
+    "playwright",
+    "pyautogui",
+    "ollama",
+    "liquid-ai",
+    "vision-language-model",
+    "accessibility",
+    "claude-desktop",
+    "cursor",
+    "codex",
+    "mouse-control",
+    "canvas-drawing"
+  ]
+}

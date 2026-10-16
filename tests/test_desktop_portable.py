@@ -31,6 +31,9 @@ def test_generated_config_has_no_machine_specific_paths():
     assert entry['command']=='/portable/venv/python'
     assert entry['args']==['-m','d1_computer_use_mcp.server']
     assert entry['env']['D1_OLLAMA_BASE_URL']=='http://localhost:11434'
+    npx_entry=mcp_config(ollama_url='http://localhost:11434',use_npx=True)['mcpServers']['Flash computer use']
+    assert npx_entry['command']=='npx'
+    assert npx_entry['args']==['-y','github:shortsspectrumai-del/flash-computer-use']
 
 
 @pytest.mark.asyncio

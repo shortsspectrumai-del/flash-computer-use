@@ -1,7 +1,11 @@
 {
   "mcpServers": {
     "Flash computer use": {
-      "command": "/path/to/flash-computer-use/run-mcp.sh",
+      "command": "npx",
+      "args": [
+        "-y",
+        "github:shortsspectrumai-del/flash-computer-use"
+      ],
       "env": {
         "D1_PROVIDER": "ollama",
         "D1_MODEL_NAME": "d1:3b",
@@ -9,7 +13,9 @@
         "D1_TIMEOUT_SECONDS": "120",
         "D1_BROWSER_STRATEGY": "hybrid",
         "D1_DESKTOP_STRATEGY": "hybrid",
-        "D1_IMAGE_MAX_SIDE": "768"
+        "D1_IMAGE_MAX_SIDE": "768",
+        "D1_REAL_MOUSE": "true",
+        "D1_MOUSE_DURATION": "0.04"
       }
     }
   }

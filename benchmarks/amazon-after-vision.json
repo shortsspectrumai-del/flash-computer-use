@@ -1,0 +1,36 @@
+{
+  "open": {
+    "status": "ok",
+    "url": "https://www.amazon.it/",
+    "page_title": "Amazon.it: elettronica, libri, musica, fashion, videogiochi, DVD e tanto altro",
+    "ready": true,
+    "input_fields": [
+      {
+        "label": "Cerca Amazon.it",
+        "role": "searchbox"
+      }
+    ],
+    "page_text_preview": "Passa a\nContenuti principali\n.it\nIn consegna a Padua 35134\nAggiorna posizione\nTutte le categorie\nTutte le categorie\nAlexa Skill\nAlimentari e cura della casa\nAmazon Global Store\nAmazon Haul\nAmazon Seconda mano\nApp e Giochi\nAudiolibri Audible\nAuto e Moto - Parti e Accessori\nBellezza\nBuoni Regalo\nCancelleria e prodotti per ufficio\nCasa e cucina\nCD e Vinili\nCortilia\nDispositivi Amazon\nElettronica\nFai "
+  },
+  "open_seconds": 2.055,
+  "visible_input_labels": [
+    "Cerca Amazon.it"
+  ],
+  "search": {
+    "status": "ok",
+    "clicked_coordinates": [
+      652,
+      30
+    ],
+    "confidence": 0.8451680615633959,
+    "confidence_source": "calibrated_d1",
+    "method": "d1",
+    "typed_verified": true,
+    "typed_characters": 28,
+    "ui_changed": null,
+    "verification_pending": true
+  },
+  "search_seconds": 3.979,
+  "final_url": "https://www.amazon.it/s?k=taglia+capelli+professionale&__mk_it_IT=%C3%85M%C3%85%C5%BD%C3%95%C3%91&ref=nb_sb_noss",
+  "submitted": true
+}

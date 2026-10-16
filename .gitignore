@@ -1,0 +1,32 @@
+# Virtual environments & runtime
+.venv/
+venv/
+.runtime/
+
+# Python caches & build artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+build/
+dist/
+*.egg-info/
+
+# Local environment & machine-specific overrides
+.env
+.env.*
+!.env.example
+.ollama-local.env
+
+# Sandbox / agent mount points
+.agents/
+.aws/
+.codex/
+
+# OS & editor files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

@@ -1,0 +1,47 @@
+{
+  "runs": [
+    {
+      "ready_seconds": 4.068,
+      "type_seconds": 2.556,
+      "ready": {
+        "status": "ready",
+        "noul": 0.9199779233848653,
+        "answer": true,
+        "confidence": 0.9199779233848653,
+        "confidence_source": "calibrated_d1"
+      },
+      "type": {
+        "status": "ok",
+        "clicked_coordinates": [
+          353,
+          43
+        ],
+        "confidence": 0.9127545300553883,
+        "confidence_source": "calibrated_d1",
+        "method": "d1",
+        "typed_verified": true,
+        "typed_characters": 28,
+        "ui_changed": true
+      },
+      "correct": true,
+      "inferences": [
+        {
+          "seconds": 3.985,
+          "size": [
+            1280,
+            800
+          ],
+          "questions": 1
+        },
+        {
+          "seconds": 2.328,
+          "size": [
+            646,
+            115
+          ],
+          "questions": 1
+        }
+      ]
+    }
+  ]
+}

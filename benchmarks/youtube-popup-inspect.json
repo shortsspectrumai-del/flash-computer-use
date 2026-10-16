@@ -1,0 +1,76 @@
+{
+  "url": "https://www.youtube.com/",
+  "title": "YouTube",
+  "popup": {
+    "status": "popup_found",
+    "title": "Prima di continuare su YouTube",
+    "text_preview": "Una società Google\nit\nAccedi\nPrima di continuare su YouTube\nRicordiamo che i nostri servizi sono finanziati principalmente tramite la pubblicazione di annunci. Scopri di più su come utilizziamo i dati per la pubblicità.\nUsiamo cookie e dati, inclusi gli indirizzi IP, per\nFornire e gestire i servizi Google\nMonitorare le interruzioni dei servizi e proteggere da spam, attività fraudolente e abusi\nMis",
+    "scrollable": true,
+    "buttons": [
+      {
+        "index": 0,
+        "label": "Lingua: Italian",
+        "text": "it",
+        "enabled": true,
+        "action": null
+      },
+      {
+        "index": 1,
+        "label": "Accedi",
+        "text": "Accedi",
+        "enabled": true,
+        "action": null
+      },
+      {
+        "index": 2,
+        "label": "dati per la pubblicità",
+        "text": "dati per la pubblicità",
+        "enabled": true,
+        "action": null
+      },
+      {
+        "index": 3,
+        "label": "cookie",
+        "text": "cookie",
+        "enabled": true,
+        "action": null
+      },
+      {
+        "index": 4,
+        "label": "Rifiuta l'utilizzo dei cookie e di altri dati per le finalità descritte",
+        "text": "Rifiuta tutto",
+        "enabled": true,
+        "action": "reject"
+      },
+      {
+        "index": 5,
+        "label": "Accetta l'utilizzo dei cookie e di altri dati per le finalità descritte",
+        "text": "Accetta tutto",
+        "enabled": true,
+        "action": "accept"
+      },
+      {
+        "index": 6,
+        "label": "Altre opzioni",
+        "text": "Altre opzioni",
+        "enabled": true,
+        "action": null
+      },
+      {
+        "index": 7,
+        "label": "Norme sulla privacy",
+        "text": "Norme sulla privacy",
+        "enabled": true,
+        "action": null
+      },
+      {
+        "index": 8,
+        "label": "Termini di servizio",
+        "text": "Termini di servizio",
+        "enabled": true,
+        "action": null
+      }
+    ]
+  },
+  "consent_chosen": false
+}

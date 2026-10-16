@@ -1,0 +1,33 @@
+[
+  {
+    "depth": 2,
+    "seconds": 14.942,
+    "inside_button": false,
+    "result": {
+      "status": "ok",
+      "clicked_coordinates": [
+        1620,
+        371
+      ],
+      "confidence": 0.8039749116818636,
+      "confidence_source": "calibrated_d1",
+      "method": "d1",
+      "cell_size": [
+        120,
+        68
+      ],
+      "refinement_steps": 2
+    }
+  },
+  {
+    "depth": 3,
+    "seconds": 10.92,
+    "inside_button": false,
+    "result": {
+      "status": "low_confidence",
+      "choice": "none",
+      "confidence": 0.8397420272331649,
+      "confidence_source": "calibrated_d1"
+    }
+  }
+]

@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "Flash computer use": {
+      "command": "/path/to/flash-computer-use/run-mcp.sh",
+      "env": {
+        "D1_PROVIDER": "ollama",
+        "D1_MODEL_NAME": "d1:3b",
+        "D1_OLLAMA_BASE_URL": "http://localhost:11434",
+        "D1_TIMEOUT_SECONDS": "120",
+        "D1_BROWSER_STRATEGY": "hybrid",
+        "D1_DESKTOP_STRATEGY": "hybrid",
+        "D1_IMAGE_MAX_SIDE": "768"
+      }
+    }
+  }
+}

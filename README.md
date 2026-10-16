@@ -4,7 +4,7 @@
 [![Python 3.11+](https://img.shields.io/badge/Python-3.11%2B-blue.svg)](https://www.python.org/)
 [![MCP Compatible](https://img.shields.io/badge/MCP-Model%20Context%20Protocol-green.svg)](https://modelcontextprotocol.io/)
 [![OS: Linux | Windows | macOS](https://img.shields.io/badge/OS-Linux%20%7C%20Windows%20%7C%20macOS-informational.svg)](#8-cross-platform-support-linux-windows-macos)
-[![Tests: 69 Passed](https://img.shields.io/badge/Tests-69%20passed-brightgreen.svg)](#1-speed--accuracy-benchmarks)
+[![Tests: 74 Passed](https://img.shields.io/badge/Tests-74%20passed-brightgreen.svg)](#1-speed--accuracy-benchmarks)
 
 **Flash computer use** is a high-speed, precision-engineered **Model Context Protocol (MCP)** server in Python for controlling both **web browsers** (Playwright) and the **physical OS desktop** (Linux X11, Windows, macOS).
 

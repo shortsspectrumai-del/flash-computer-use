@@ -2,7 +2,13 @@ import asyncio
 from PIL import ImageChops, ImageStat
 from .som_annotator import annotate
 from .vision_grid import grid
-from .targeting import match_dom_target, crop_candidates
+from .targeting import (
+    match_dom_target,
+    crop_candidates,
+    select_d1_candidates,
+    format_d1_options,
+    should_crop_candidates,
+)
 
 
 class ComputerUse:
@@ -39,32 +45,39 @@ class ComputerUse:
                     exact=match_dom_target(target,elements)
                     if exact is not None:
                         x,y,w,h=exact['box']
+                        point=exact.get('hit') or [round(x+w/2),round(y+h/2)]
                         return {'status':'ok','candidate_id':exact['id'],
-                                'clicked_coordinates':[round(x+w/2),round(y+h/2)],
+                                'clicked_coordinates':point,
                                 'confidence':1.,'confidence_source':'dom_unique_match','method':'dom'},None
                 before,_=await backend.capture()
             else:
                 before,elements=await backend.snapshot()
             if not elements:
                 return {'status':'not_found'}, before
-            image = annotate(before,elements)
-            if editable_only:
-                image=crop_candidates(image,elements)
-            candidates = elements
+            candidates = select_d1_candidates(target, elements)
             group_confidence = 1.
-            if len(elements)>25:
-                groups = [elements[i:i+25] for i in range(0,len(elements),25)]
-                choice = await self._choose(image,target,{str(i): '; '.join(e['id']+': '+e['label'] for e in group) for i,group in enumerate(groups)})
+            if len(candidates)>25:
+                stage1_image = annotate(before, candidates)
+                groups = [candidates[i:i+25] for i in range(0,len(candidates),25)]
+                group_options = {}
+                for i, group in enumerate(groups):
+                    formatted = format_d1_options(group)
+                    group_options[str(i)] = '; '.join(f"{cid}: {desc}" for cid, desc in formatted.items())
+                choice = await self._choose(stage1_image, target, group_options)
                 if choice['choice']=='none' or choice['confidence']<threshold:
                     return {'status':'low_confidence',**choice},before
                 candidates = groups[int(choice['choice'])]
                 group_confidence = choice['confidence']
-            choice = await self._choose(image,target,{e['id']:e['label'] for e in candidates})
+            # Annotate only the active candidate set so badges never clutter unrelated page areas
+            image = annotate(before, candidates)
+            if editable_only or (len(candidates) < len(elements) and should_crop_candidates(image, candidates)):
+                image = crop_candidates(image, candidates)
+            choice = await self._choose(image, target, format_d1_options(candidates))
             if choice['choice']=='none' or choice['confidence']<threshold:
                 return {'status':'low_confidence',**choice},before
             element = next(e for e in candidates if e['id']==choice['choice'])
             x,y,w,h = element['box']
-            point = [round(x+w/2),round(y+h/2)]
+            point = element.get('hit') or [round(x+w/2),round(y+h/2)]
             confidence = min(group_confidence,choice['confidence'])
         else:
             before,origin=await backend.capture()
@@ -205,9 +218,25 @@ class ComputerUse:
         if direction not in {'up','down'} or not 0<=max_scrolls<=100:
             raise ValueError('Invalid direction or max_scrolls')
         backend = self.backend(mode)
+        answer = {'noul': 0.0, 'answer': False, 'confidence': 1.0, 'confidence_source': 'dom_offscreen'}
         for step in range(max_scrolls+1):
             if mode=='browser' and hasattr(backend,'block_status') and backend.block_status():
                 return backend.block_status()
+            is_hybrid_dom = mode=='browser' and self.engine.settings.browser_strategy=='hybrid' and hasattr(backend,'candidates')
+            if is_hybrid_dom:
+                exact = match_dom_target(target_description, await backend.candidates())
+                if exact is not None:
+                    return {'status':'visible','scrolls':step,'method':'dom','noul':1.,'answer':True,'confidence':1.,'confidence_source':'dom_unique_match'}
+                if hasattr(backend,'offscreen_candidates') and match_dom_target(target_description, await backend.offscreen_candidates()) is not None:
+                    if step<max_scrolls:
+                        outcome=await backend.scroll(direction)
+                        if isinstance(outcome,dict):
+                            if outcome['status']!='ok':
+                                return outcome
+                            if not outcome.get('moved',True):
+                                return {'status':'not_found','scrolls':step+1,'at_end':True,**answer}
+                        continue
+                    return {'status':'not_found','scrolls':max_scrolls,**answer}
             image,_ = await backend.capture()
             answer = await self.engine.ask_yes_no(image,f'Is {target_description} clearly visible?')
             if answer['noul']>=.8:

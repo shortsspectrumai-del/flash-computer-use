@@ -230,3 +230,87 @@ async def test_auto_canvas_detection_and_mouse_drag(monkeypatch):
         assert await browser.page.evaluate('window.strokes===3')
     finally:
         await browser.close()
+
+
+@pytest.mark.asyncio
+async def test_card_context_svg_icon_select_and_hybrid_scroll(monkeypatch):
+    monkeypatch.setenv('PLAYWRIGHT_BROWSERS_PATH',str(Path('.runtime/playwright').resolve()))
+    monkeypatch.setenv('D1_BROWSER_HEADLESS','true')
+    class NoInference:
+        settings=Settings()
+        async def ask_choice(self,*args):
+            raise AssertionError('Should resolve deterministically via DOM context/icon/select')
+        async def ask_yes_no(self,*args):
+            raise AssertionError('Should resolve scroll_until_visible via DOM')
+    browser=Browser()
+    try:
+        await browser.start()
+        await browser.page.set_content('''
+            <header>
+                <button onclick="window.cartClicked=true"><svg aria-label="Shopping Cart"></svg></button>
+                <select aria-label="Sort order" onchange="window.sorted=this.value">
+                    <option value="featured">Featured</option>
+                    <option value="price_asc">Price: Low to High</option>
+                </select>
+            </header>
+            <main>
+                <article><h3>Starter Kit</h3><button onclick="window.picked=1">Select Plan</button></article>
+                <article><h3>Enterprise Suite</h3><button onclick="window.picked=2">Select Plan</button></article>
+                <div style="height:1400px"></div>
+                <button id="bottom-btn" onclick="window.bottomClicked=true">Load More Results</button>
+            </main>
+        ''')
+        actions=ComputerUse(NoInference(),browser,None)
+        # 1. SVG icon button resolved via child aria-label
+        r1=await actions.smart_click('Shopping Cart','browser')
+        assert r1['status']=='ok' and r1['method']=='dom'
+        assert await browser.page.evaluate('window.cartClicked === true')
+        # 2. Duplicate "Select Plan" button disambiguated by enclosing article heading
+        r2=await actions.smart_click('Select Plan for Enterprise Suite','browser')
+        assert r2['status']=='ok' and r2['method']=='dom'
+        assert await browser.page.evaluate('window.picked === 2')
+        # 3. <select> dropdown option selection via smart_type
+        r3=await actions.smart_type('Sort order','Price: Low to High',press_enter=False,mode='browser')
+        assert r3['status']=='ok' and r3['typed_verified'] is True
+        assert await browser.page.evaluate('window.sorted === "price_asc"')
+        # 4. Hybrid scroll_until_visible finds offscreen button via DOM without VLM call
+        r4=await actions.scroll_until_visible('Load More Results',direction='down',max_scrolls=5,mode='browser')
+        assert r4['status']=='visible' and r4['method']=='dom' and r4['scrolls']>=1
+    finally:
+        await browser.close()
+
+
+@pytest.mark.asyncio
+async def test_d1_synergy_narrows_and_crops_ambiguous_candidates_on_dense_page(monkeypatch):
+    monkeypatch.setenv('PLAYWRIGHT_BROWSERS_PATH',str(Path('.runtime/playwright').resolve()))
+    monkeypatch.setenv('D1_BROWSER_HEADLESS','true')
+    calls=[]
+    class SynergyEngine:
+        settings=Settings()
+        async def ask_choice(self,image,question,options):
+            calls.append((image.size, options))
+            # Pick the second Buy Now button based on contextual option description
+            chosen=next(k for k,v in options.items() if k!='none' and 'Studio Monitor' in v)
+            return {'choice':chosen,'confidence':.95,'confidence_source':'calibrated_d1'}
+    browser=Browser()
+    try:
+        await browser.start()
+        nav=''.join(f'<a href="#c{i}" style="margin:4px;display:inline-block">Category {i}</a>' for i in range(40))
+        await browser.page.set_content(f'''
+            <nav>{nav}</nav>
+            <main style="margin-top:40px;display:flex;gap:20px">
+                <article style="width:220px;height:120px"><h3>USB Microphone</h3><button onclick="window.bought=1">Buy Now</button></article>
+                <article style="width:220px;height:120px"><h3>Studio Monitor</h3><button onclick="window.bought=2">Buy Now</button></article>
+            </main>
+        ''')
+        actions=ComputerUse(SynergyEngine(),browser,None)
+        result=await actions.smart_click('Buy Now','browser')
+        assert result['status']=='ok' and result['method']=='d1'
+        assert await browser.page.evaluate('window.bought === 2')
+        # Even though the page has 42 elements, select_d1_candidates narrowed it to the 2 "Buy Now" buttons in a single cropped D1 call!
+        assert len(calls)==1
+        img_size, opts = calls[0]
+        assert len([k for k in opts if k!='none'])==2
+        assert img_size[0] < 1280 and img_size[1] < 800
+    finally:
+        await browser.close()

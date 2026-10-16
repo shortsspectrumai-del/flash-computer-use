@@ -183,9 +183,9 @@ class Browser:
         # Keep references to the actual nodes. A replacement with the same label
         # must never inherit a previously selected target.
         self._snapshot_handle = await self.page.evaluate_handle(r'''() => {
-          const selector = 'button,a,input,textarea,select,summary,canvas,[role="button"],[role="link"],[role="searchbox"],[role="textbox"],[role="menuitem"],[role="tab"],[role="option"],[role="checkbox"],[role="radio"],[role="switch"],[role="combobox"],[contenteditable="true"]';
+          const selector = 'button,a,input,textarea,select,summary,canvas,[onclick],[role="button"],[role="link"],[role="searchbox"],[role="textbox"],[role="menuitem"],[role="menuitemcheckbox"],[role="menuitemradio"],[role="tab"],[role="option"],[role="checkbox"],[role="radio"],[role="switch"],[role="combobox"],[role="treeitem"],[contenteditable="true"],[tabindex]:not([tabindex="-1"])';
           const nodes = [...document.querySelectorAll(selector)];
-          const probes = [[0.5,0.5],[0.35,0.5],[0.65,0.5],[0.5,0.35],[0.5,0.65],[0.25,0.5],[0.75,0.5]];
+          const probes = [[0.5,0.5],[0.35,0.5],[0.65,0.5],[0.5,0.35],[0.5,0.65],[0.25,0.5],[0.75,0.5],[0.2,0.2],[0.8,0.8]];
           const findHit = el => {
             const r = el.getBoundingClientRect();
             const x = Math.max(0,r.x), y = Math.max(0,r.y), right = Math.min(innerWidth,r.right), bottom = Math.min(innerHeight,r.bottom);
@@ -197,12 +197,37 @@ class Browser:
               for (const [fx,fy] of probes) {
                 const px = rx+(rr-rx)*fx, py = ry+(rb-ry)*fy;
                 const top = document.elementFromPoint(px,py);
-                if (top && (el===top || el.contains(top) || (top.tagName==='LABEL' && top.contains(el)))) {
+                if (top && (el===top || el.contains(top) || top.contains(el) || (top.tagName==='LABEL' && top.contains(el)))) {
                   return {x, y, w: right-x, h: bottom-y, cx: px, cy: py};
                 }
               }
             }
             return null;
+          };
+          const inferZone = (el, cx, cy) => {
+            let landmark = '';
+            if (el.closest('dialog,[role="dialog"],[role="alertdialog"]')) landmark = 'dialog';
+            else if (el.closest('header,[role="banner"]')) landmark = 'header';
+            else if (el.closest('nav,[role="navigation"]')) landmark = 'nav';
+            else if (el.closest('aside,[role="complementary"]')) landmark = 'aside';
+            else if (el.closest('footer,[role="contentinfo"]')) landmark = 'footer';
+            else if (el.closest('main,[role="main"]')) landmark = 'main';
+            const vPos = cy < innerHeight * 0.25 ? 'top' : (cy > innerHeight * 0.75 ? 'bottom' : 'center');
+            const hPos = cx < innerWidth * 0.33 ? 'left' : (cx > innerWidth * 0.67 ? 'right' : '');
+            const spatial = hPos ? (vPos === 'center' ? hPos : `${vPos}-${hPos}`) : vPos;
+            return landmark ? `${landmark} ${spatial}` : spatial;
+          };
+          const inferContext = (el, primaryLabel) => {
+            const container = el.closest('article,section,li,tr,[role="listitem"],[role="row"],form,fieldset,dialog,[role="dialog"]');
+            if (!container) return '';
+            const heading = container.querySelector('h1,h2,h3,h4,h5,h6,legend,[role="heading"],strong');
+            if (heading && heading !== el && !el.contains(heading)) {
+              const ht = (heading.innerText || heading.textContent || '').trim().slice(0, 80);
+              if (ht && ht !== primaryLabel) return ht;
+            }
+            const raw = (container.innerText || '').replace(/\s+/g, ' ').trim();
+            if (!raw || raw === primaryLabel) return '';
+            return raw.replace(primaryLabel || '', '').trim().slice(0, 80);
           };
           const selected=[], elements=[];
           for (const el of nodes) {
@@ -213,13 +238,23 @@ class Browser:
             const labelled=(el.getAttribute('aria-labelledby')||'').split(/\s+/).map(id=>document.getElementById(id)?.textContent||'').join(' ').trim();
             const inputType=(el.type||'').toLowerCase();
             const valAlias=(['button','submit','reset'].includes(inputType)?el.value:'')||'';
-            const aliases=[el.getAttribute('aria-label'),labelled,...[...(el.labels||[])].map(l=>l.innerText),el.innerText,el.placeholder,el.title,valAlias].filter(Boolean).map(a=>a.trim().slice(0,160)).filter(Boolean);
-            const editable=!el.readOnly && (el.isContentEditable || el.tagName==='TEXTAREA' || (el.tagName==='INPUT' && !['button','submit','reset','checkbox','radio','file','hidden','image','range','color'].includes(inputType)));
+            const childLabels=[...el.querySelectorAll('img[alt],svg[aria-label],svg title,[aria-label],[title]')].map(c=>c.getAttribute?.('alt')||c.getAttribute?.('aria-label')||c.getAttribute?.('title')||c.textContent||'').filter(Boolean);
+            const aliases=[el.getAttribute('aria-label'),labelled,...[...(el.labels||[])].map(l=>l.innerText),el.innerText,el.placeholder,el.title,valAlias,...childLabels,el.getAttribute('name')].filter(Boolean).map(a=>a.replace(/\s+/g,' ').trim().slice(0,160)).filter(Boolean);
+            const editable=!el.readOnly && (el.isContentEditable || el.tagName==='TEXTAREA' || el.tagName==='SELECT' || (el.tagName==='INPUT' && !['button','submit','reset','checkbox','radio','file','hidden','image','range','color'].includes(inputType)));
             let role=el.getAttribute('role')||'';
-            if (inputType==='search' || (editable && el.closest('[role="search"]'))) role='searchbox';
+            if (!role) {
+              if (inputType==='search' || (editable && el.closest('[role="search"]'))) role='searchbox';
+              else if (el.tagName==='BUTTON' || ['button','submit','reset'].includes(inputType)) role='button';
+              else if (el.tagName==='A') role='link';
+              else if (el.tagName==='SELECT') role='combobox';
+              else if (editable) role='textbox';
+            }
             const id=String(elements.length+1);
+            const primaryLabel=aliases[0]||el.name||el.tagName;
+            const zone=inferZone(el, hit.cx, hit.cy);
+            const context=inferContext(el, primaryLabel);
             selected.push(el);
-            elements.push({id,label:aliases[0]||el.name||el.tagName,aliases,box:[hit.x,hit.y,hit.w,hit.h],editable,role,input_type:inputType});
+            elements.push({id,label:primaryLabel,aliases,box:[hit.x,hit.y,hit.w,hit.h],hit:[Math.round(hit.cx),Math.round(hit.cy)],editable,role,input_type:inputType,zone,context});
             if (selected.length>=625) break;
           }
           const signature=el=>JSON.stringify([el.tagName,el.getAttribute('aria-label'),el.getAttribute('aria-labelledby'),el.innerText,el.placeholder,el.title,el.getAttribute('href'),el.type,...[...(el.labels||[])].map(l=>l.innerText)]);
@@ -230,6 +265,25 @@ class Browser:
     async def snapshot(self):
         elements, (image, _) = await asyncio.gather(self.candidates(), self.capture())
         return image,elements
+
+    async def offscreen_candidates(self):
+        await self.start()
+        return await self.page.evaluate(r'''() => {
+          const selector = 'button,a,input,textarea,select,summary,canvas,h1,h2,h3,h4,[role="button"],[role="link"],[role="searchbox"],[role="textbox"],[role="heading"]';
+          const out = [];
+          for (const el of document.querySelectorAll(selector)) {
+            const s = getComputedStyle(el);
+            if (el.disabled || s.visibility !== 'visible' || s.display === 'none' || Number(s.opacity) === 0) continue;
+            const r = el.getBoundingClientRect();
+            if (r.width < 2 || r.height < 2) continue;
+            const inViewport = r.bottom > 0 && r.top < innerHeight && r.right > 0 && r.left < innerWidth;
+            if (inViewport) continue;
+            const aliases = [el.getAttribute('aria-label'), el.innerText, el.placeholder, el.title, el.value].filter(Boolean).map(a=>String(a).replace(/\s+/g,' ').trim().slice(0,160)).filter(Boolean);
+            if (!aliases.length) continue;
+            out.push({id: String(out.length+1), label: aliases[0], aliases, box: [r.x, r.y, r.width, r.height], role: el.getAttribute('role')||''});
+          }
+          return out;
+        }''')
 
     async def interact_candidate(self,id,*,double=False,text=None,enter=False,hover=False):
         from playwright.async_api import Error as PlaywrightError
@@ -248,7 +302,7 @@ class Browser:
                 const bx=Math.max(0,Math.round((window.outerWidth-window.innerWidth)/2)),by=Math.max(0,Math.round(window.outerHeight-window.innerHeight-bx));
                 const sx=Math.round((window.mozInnerScreenX!==undefined?window.mozInnerScreenX:window.screenX+bx)+vx);
                 const sy=Math.round((window.mozInnerScreenY!==undefined?window.mozInnerScreenY:window.screenY+by)+vy);
-                return {point:[vx,vy],screen:[sx,sy],position:{x:cx-r.x,y:cy-r.y}};
+                return {point:[vx,vy],screen:[sx,sy],position:{x:cx-r.x,y:cy-r.y},tag:el.tagName};
             }''',id)
             if state is None:
                 return {'status':'stale_target'}
@@ -261,13 +315,26 @@ class Browser:
             if hover:
                 await element.hover(position=state['position'],timeout=2000)
             elif text is not None:
-                # Move & click/focus the field, replace previous content, and verify exact Unicode text.
-                await element.fill(text,timeout=2000)
-                actual=await element.evaluate("el=>el.isContentEditable ? el.innerText : el.value")
-                if actual!=text:
-                    return {'status':'typing_not_verified','typed_verified':False}
-                if enter:
-                    await element.press('Enter',timeout=2000,no_wait_after=True)
+                if state.get('tag')=='SELECT':
+                    matched=await element.evaluate('''(el, val)=>{
+                        const q=val.trim().toLowerCase();
+                        const opt=[...el.options].find(o=>o.value===val || o.text.trim()===val || o.text.trim().toLowerCase()===q || o.value.toLowerCase()===q);
+                        if(!opt) return false;
+                        el.value=opt.value;
+                        el.dispatchEvent(new Event('input',{bubbles:true}));
+                        el.dispatchEvent(new Event('change',{bubbles:true}));
+                        return true;
+                    }''', text)
+                    if not matched:
+                        return {'status':'typing_not_verified','typed_verified':False}
+                else:
+                    # Move & click/focus the field, replace previous content, and verify exact Unicode text.
+                    await element.fill(text,timeout=2000)
+                    actual=await element.evaluate("el=>el.isContentEditable ? el.innerText : el.value")
+                    if actual!=text:
+                        return {'status':'typing_not_verified','typed_verified':False}
+                    if enter:
+                        await element.press('Enter',timeout=2000,no_wait_after=True)
             elif double:
                 await element.dblclick(position=state['position'],timeout=2000,no_wait_after=True)
             else:

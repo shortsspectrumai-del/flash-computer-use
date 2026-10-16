@@ -43,7 +43,7 @@ Progettato per essere **veloce**, **preciso** e **naturale**:
 ### Linux / macOS
 
 ```bash
-git clone https://github.com/<TUO_USERNAME>/flash-computer-use.git
+git clone https://github.com/shortsspectrumai-del/flash-computer-use.git
 cd flash-computer-use
 
 # 1. Crea l'ambiente virtuale e installa le dipendenze
@@ -57,7 +57,7 @@ PLAYWRIGHT_BROWSERS_PATH=.runtime/playwright .venv/bin/python -m playwright inst
 ### Windows (PowerShell)
 
 ```powershell
-git clone https://github.com/<TUO_USERNAME>/flash-computer-use.git
+git clone https://github.com/shortsspectrumai-del/flash-computer-use.git
 cd flash-computer-use
 
 uv venv

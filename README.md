@@ -1,44 +1,97 @@
-# Flash computer use
+# ⚡ Flash computer use — Ultra-Fast Hybrid Browser & Desktop MCP Server
 
-Server **MCP (Model Context Protocol)** in Python ad alte prestazioni per il controllo completo di **browser web** e **desktop fisico** (Linux, Windows, macOS).
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Python 3.11+](https://img.shields.io/badge/Python-3.11%2B-blue.svg)](https://www.python.org/)
+[![MCP Compatible](https://img.shields.io/badge/MCP-Model%20Context%20Protocol-green.svg)](https://modelcontextprotocol.io/)
+[![OS: Linux | Windows | macOS](https://img.shields.io/badge/OS-Linux%20%7C%20Windows%20%7C%20macOS-informational.svg)](#8-cross-platform-support-linux-windows-macos)
+[![Tests: 68 Passed](https://img.shields.io/badge/Tests-68%20passed-brightgreen.svg)](#9-speed--accuracy-benchmarks)
 
-Progettato per essere **veloce**, **preciso** e **naturale**:
-- **Strategia Ibrida (`hybrid`)**: combina l'accesso istantaneo al DOM (browser) e agli alberi di accessibilità nativi del sistema operativo (desktop) con il fallback visivo decisionale **LiquidAI D1** (**Ollama**, **Transformers locale** o **API System One**).
-- **Movimento umano del mouse reale (Web + Desktop)**: sposta sempre il puntatore fisico del sistema operativo lungo una curva fluida **minimum-jerk** ($10t^3 - 15t^4 + 6t^5$) con lieve arco naturale del polso e atterraggio esatto al pixel, sincronizzando automaticamente le coordinate del browser con quelle dello schermo reale.
-- **Disegno e trascinamento su Paint e `<canvas>`**: rileva automaticamente il foglio da disegno bianco/chiaro nei programmi di grafica desktop (es. MS Paint, KolourPaint, Pinta) o gli elementi `<canvas>` nel browser, permettendo di trascinare il mouse (`mouse_drag`), disegnare a mano libera o a tratti multipli (`draw_path`) e tracciare 12 forme geometriche pronte (`draw_shape`).
+**Flash computer use** is a high-speed, precision-engineered **Model Context Protocol (MCP)** server in Python for controlling both **web browsers** (Playwright) and the **physical OS desktop** (Linux X11, Windows, macOS).
 
----
-
-## Indice
-
-1. [Requisiti di sistema](#1-requisiti-di-sistema)
-2. [Installazione passo-passo](#2-installazione-passo-passo)
-3. [Avvio e configurazione di Ollama (Modello D1)](#3-avvio-e-configurazione-di-ollama-modello-d1)
-4. [Come configurare l'MCP nei client (Cursor, Claude, Codex, Antigravity, Pi)](#4-come-configurare-lmcp-nei-client-cursor-claude-codex-antigravity-pi)
-5. [Variabili d'ambiente e parametri di configurazione](#5-variabili-dambiente-e-parametri-di-configurazione)
-6. [Elenco completo dei 15 Tool MCP](#6-elenco-completo-dei-15-tool-mcp)
-7. [Uso con programmi di disegno (Paint, KolourPaint, Canvas Web)](#7-uso-con-programmi-di-disegno-paint-kolourpaint-canvas-web)
-8. [Supporto Multi-Piattaforma (Linux, Windows, macOS)](#8-supporto-multi-piattaforma-linux-windows-macos)
-9. [Test e Benchmark](#9-test-e-benchmark)
+Unlike traditional screenshot-only computer-use agents that take 20–50 seconds per action and generate hallucinated `[x, y]` coordinates, **Flash computer use** combines **instant deterministic DOM & native OS accessibility targeting (`2–7 ms`)** with **calibrated Set-of-Mark / hierarchical grid visual decision fallback (`LiquidAI D1`)**—while always moving the **real physical OS mouse pointer** along a smooth, human-like minimum-jerk trajectory.
 
 ---
 
-## 1. Requisiti di sistema
+## ✨ Key Highlights
+
+- 🚀 **Up to 200× Faster Hybrid Execution (`hybrid` mode)**:
+  - **Browser**: Instantly resolves unique accessible labels and `searchbox` roles via DOM inspection in **2–7 ms** and verifies unoccluded click points (`elementFromPoint` multi-point hit-testing), falling back to D1 vision only when targets are ambiguous.
+  - **Desktop**: Queries native OS accessibility trees (**Linux AT-SPI**, **Windows UI Automation**, **macOS AXUIElement**) with automatic cache invalidation, bypassing screenshot capture and VLM inference whenever an exact accessible control exists.
+- 🖱️ **Human-Like Physical OS Mouse Movement (Web + Desktop)**:
+  - Always moves the real physical OS cursor along a **minimum-jerk trajectory** ($10t^3 - 15t^4 + 6t^5$) with a subtle natural wrist arc and exact pixel landing.
+  - In visible browser mode, automatically maps Playwright viewport coordinates to global screen coordinates before every click, typing action, scroll, drag, or popup action.
+- 🎨 **Paint & `<canvas>` Drawing + Dragging**:
+  - Automatically detects the largest white/light drawing sheet (`canvas_bounds`) in desktop paint apps (**MS Paint**, **KolourPaint**, **Pinta**, etc.) or HTML5 `<canvas>` elements in the browser.
+  - Supports smooth direct dragging (`mouse_drag`), continuous freehand & multi-stroke paths with anti-gap interpolation (`draw_path`), and 12 ready-to-use geometric shapes (`draw_shape`).
+- 🛡️ **Zero Coordinate Hallucination**:
+  - Uses **LiquidAI D1** via native `/v1/systemone` decision probabilities (`noul`, `choice`, `score` with zero generated tokens) over Set-of-Mark badges and coarse-to-fine grids (**Ollama**, **local Hugging Face Transformers**, or **Cloud API**).
+- 💻 **Cross-Platform Precision**:
+  - Built-in **Windows Per-Monitor DPI Awareness**, **macOS Retina multi-monitor scaling**, and **Linux X11** native clipboard & pointer integration.
+
+---
+
+## 📖 Table of Contents
+
+1. [Speed & Accuracy Benchmarks](#1-speed--accuracy-benchmarks)
+2. [System Requirements](#2-system-requirements)
+3. [Step-by-Step Installation](#3-step-by-step-installation)
+4. [Ollama & D1 Model Setup](#4-ollama--d1-model-setup)
+5. [MCP Client Configuration (Cursor, Claude, Codex, Antigravity)](#5-mcp-client-configuration-cursor-claude-codex-antigravity)
+6. [Environment Variables Reference](#6-environment-variables-reference)
+7. [Complete Reference of All 15 MCP Tools](#7-complete-reference-of-all-15-mcp-tools)
+8. [Drawing in Paint, KolourPaint & Web Canvas](#8-drawing-in-paint-kolourpaint--web-canvas)
+9. [Cross-Platform Support (Linux, Windows, macOS)](#9-cross-platform-support-linux-windows-macos)
+
+---
+
+## 1. Speed & Accuracy Benchmarks
+
+Measured on a dense synthetic e-commerce page (50+ interactive elements) using **LiquidAI D1 3B (Q8_0)** on **Ollama 0.40.4** (NVIDIA GTX 1050 4 GB VRAM). Full details and raw JSON outputs are in [`benchmarks/REPORT.md`](benchmarks/REPORT.md).
+
+| Benchmark Step | Baseline (Unoptimized Vision) | Optimized Vision (`D1_BROWSER_STRATEGY=vision`) | Hybrid Mode (`D1_BROWSER_STRATEGY=hybrid`, Default) |
+|---|---:|---:|---:|
+| **Readiness Check (`wait_until_ready`)** | `24.247 s` (1280×800 D1) | `4.068 s` (768×480 D1) | **`0.002 – 0.007 s`** (`2–7 ms`, DOM) |
+| **Search Fill + Verify + Submit (`smart_type`)** | `26.795 s` (Failed, low confidence) | `2.556 s` (646×115 cropped D1, Verified) | **`0.177 – 0.251 s`** (`177–251 ms`, Verified) |
+| **Total End-to-End Tool Execution** | `51.042 s` (Failed) | `6.624 s` (100% Pass) | **`~0.18 – 0.26 s`** (**100% Pass**) |
+| **VLM Inference Calls** | 2 | 2 | **0** |
+| **Exact Input Value & Submit Verified** | No (`0/1`) | Yes (`1/1`) | **Yes (`3/3`)** |
+
+### Why It Is So Fast
+1. **Deterministic DOM & Native Accessibility First (`hybrid`)**: Unique accessible labels and roles bypass VLM calls entirely (`2–7 ms`).
+2. **Candidate Region Cropping & Downscaling (`vision`)**: When D1 vision fallback is triggered, images are proportionally downscaled (`D1_IMAGE_MAX_SIDE=768`) and input candidates are tightly cropped (`646×115`), cutting GPU latency by **10×** (`26.8 s → 2.55 s`) and increasing model confidence from `0.40` to `0.91`.
+3. **Zero-Lag OS Pointer**: Removes PyAutoGUI's default `100 ms` per-step sleep, executing smooth minimum-jerk human curves in ~`40 ms`.
+
+Reproduce the benchmarks locally:
+
+```bash
+# Hybrid mode benchmark (3 runs)
+D1_BENCH_RUNS=3 .venv/bin/python benchmarks/browser_speed.py benchmarks/after.json
+
+# Forced D1 Vision fallback benchmark
+D1_BROWSER_STRATEGY=vision D1_BENCH_RUNS=1 .venv/bin/python benchmarks/browser_speed.py benchmarks/after-vision.json
+
+# Desktop hierarchical grid precision benchmark
+.venv/bin/python benchmarks/desktop_precision.py
+```
+
+---
+
+## 2. System Requirements
 
 - **Python**: `>= 3.11`
-- **Gestore pacchetti**: [`uv`](https://docs.astral.sh/uv/) (consigliato) oppure `pip`
-- **Provider decisionale (uno a scelta)**:
-  - **Ollama** (consigliato, locale): versione con supporto `/v1/systemone` (es. `>= 0.40`) e modello `d1:3b`
-  - **Transformers locale**: GPU CUDA / Apple MPS / CPU con modello `LiquidAI/d1-3B`
-  - **Cloud API**: endpoint compatibile con `/v1/systemone`
-- **Prerequisiti Desktop per sistema operativo**:
-  - **Linux**: sessione grafica **X11** (`DISPLAY` attivo) e `xclip` o `xsel` per l'inserimento rapido di testo Unicode negli appunti.
-  - **Windows**: desktop interattivo sbloccato (la consapevolezza DPI Per-Monitor viene attivata automaticamente dal server).
-  - **macOS**: permessi di **Accessibilità** e **Registrazione schermo** concessi al terminale o al client MCP.
+- **Package Manager**: [`uv`](https://docs.astral.sh/uv/) (recommended) or `pip`
+- **Decision Engine Provider (choose one)**:
+  - **Ollama** (recommended, local): version supporting `/v1/systemone` (e.g. `>= 0.40`) with `d1:3b`
+  - **Local Transformers**: CUDA / Apple MPS / CPU with `LiquidAI/d1-3B`
+  - **Cloud API**: any endpoint implementing `/v1/systemone`
+- **OS Desktop Prerequisites**:
+  - **Linux**: active **X11** session (`DISPLAY`) and `xclip` or `xsel` for fast Unicode clipboard pasting.
+  - **Windows**: interactive desktop session (Per-Monitor DPI Awareness is enabled automatically).
+  - **macOS**: grant **Accessibility** and **Screen Recording** permissions to your terminal / MCP client.
 
 ---
 
-## 2. Installazione passo-passo
+## 3. Step-by-Step Installation
 
 ### Linux / macOS
 
@@ -46,11 +99,11 @@ Progettato per essere **veloce**, **preciso** e **naturale**:
 git clone https://github.com/shortsspectrumai-del/flash-computer-use.git
 cd flash-computer-use
 
-# 1. Crea l'ambiente virtuale e installa le dipendenze
+# 1. Create virtual environment and install dependencies
 uv venv
 uv pip install -e '.[dev]'
 
-# 2. Installa il browser Chromium per Playwright
+# 2. Install Playwright Chromium
 PLAYWRIGHT_BROWSERS_PATH=.runtime/playwright .venv/bin/python -m playwright install chromium
 ```
 
@@ -68,36 +121,34 @@ $env:PLAYWRIGHT_BROWSERS_PATH=".runtime\playwright"
 
 ---
 
-## 3. Avvio e configurazione di Ollama (Modello D1)
+## 4. Ollama & D1 Model Setup
 
-Il server usa il modello decisionale multimodale **`d1:3b`** tramite l'endpoint nativo `/v1/systemone` di Ollama (zero token generati, decisioni calibrate `noul`, `choice`, `score`).
+Pull the `d1:3b` decision model and verify your environment:
 
 ```bash
-# Scarica il modello D1
+# Pull LiquidAI D1 3B model
 ollama pull d1:3b
 
-# Verifica lo stato del sistema e delle dipendenze
+# Check OS desktop capabilities, accessibility backend, and Python dependencies
 .venv/bin/flash-doctor
 
-# Verifica che l'inferenza D1 risponda correttamente
+# Verify D1 decision inference (binary noul, choice, score) on a synthetic image
 D1_PROVIDER=ollama D1_MODEL_NAME=d1:3b .venv/bin/flash-check --inference
 ```
 
-> **Nota**: se Ollama è in esecuzione su una porta diversa da quella predefinita (es. `11435`), passa `D1_OLLAMA_BASE_URL=http://127.0.0.1:11435`.
-
 ---
 
-## 4. Come configurare l'MCP nei client (Cursor, Claude, Codex, Antigravity, Pi)
+## 5. MCP Client Configuration (Cursor, Claude, Codex, Antigravity)
 
-### Generazione automatica della configurazione JSON
+### Auto-Generate Portable MCP JSON
 
-Puoi generare in qualsiasi momento il blocco JSON pronto con il percorso esatto del tuo interprete Python eseguendo:
+Generate a ready-to-use JSON configuration pointing to your current Python environment:
 
 ```bash
 .venv/bin/flash-config --ollama-url http://localhost:11434
 ```
 
-Per salvarlo direttamente su file:
+Save directly to a file:
 
 ```bash
 .venv/bin/flash-config --ollama-url http://localhost:11434 --output mcp.json
@@ -107,13 +158,13 @@ Per salvarlo direttamente su file:
 
 ### A. Cursor / Claude Desktop / Google Antigravity (`mcp.json` / `claude_desktop_config.json`)
 
-Aggiungi questo blocco nel file di configurazione MCP del client (vedi anche [`examples/mcp.ollama.json`](examples/mcp.ollama.json)):
+Add the following block to your client's MCP configuration file (see [`examples/mcp.ollama.json`](examples/mcp.ollama.json)):
 
 ```json
 {
   "mcpServers": {
     "Flash computer use": {
-      "command": "/percorso/assoluto/flash-computer-use/run-mcp.sh",
+      "command": "/absolute/path/to/flash-computer-use/run-mcp.sh",
       "env": {
         "D1_PROVIDER": "ollama",
         "D1_MODEL_NAME": "d1:3b",
@@ -130,13 +181,13 @@ Aggiungi questo blocco nel file di configurazione MCP del client (vedi anche [`e
 }
 ```
 
-*(Su **Windows**, usa `"C:\\percorso\\assoluto\\flash-computer-use\\run-mcp.cmd"` come `command`).*
+*(On **Windows**, set `"command"` to `"C:\\absolute\\path\\to\\flash-computer-use\\run-mcp.cmd"`).*
 
 ---
 
 ### B. OpenAI Codex CLI (`~/.codex/config.toml`)
 
-Puoi registrarlo da terminale con un solo comando:
+Register via CLI:
 
 ```bash
 codex mcp add "Flash computer use" \
@@ -146,14 +197,14 @@ codex mcp add "Flash computer use" \
   --env D1_TIMEOUT_SECONDS=120 \
   --env D1_BROWSER_STRATEGY=hybrid \
   --env D1_DESKTOP_STRATEGY=hybrid \
-  -- '/percorso/assoluto/flash-computer-use/run-mcp.sh'
+  -- '/absolute/path/to/flash-computer-use/run-mcp.sh'
 ```
 
-Oppure copia il contenuto di [`examples/codex.ollama.toml`](examples/codex.ollama.toml) nel tuo `~/.codex/config.toml`:
+Or copy [`examples/codex.ollama.toml`](examples/codex.ollama.toml) into `~/.codex/config.toml`:
 
 ```toml
 [mcp_servers."Flash computer use"]
-command = "/percorso/assoluto/flash-computer-use/run-mcp.sh"
+command = "/absolute/path/to/flash-computer-use/run-mcp.sh"
 startup_timeout_sec = 30
 tool_timeout_sec = 120
 
@@ -176,98 +227,95 @@ claude mcp add --transport stdio \
   --env D1_PROVIDER=ollama \
   --env D1_MODEL_NAME=d1:3b \
   --env D1_OLLAMA_BASE_URL=http://localhost:11434 \
-  "Flash computer use" -- '/percorso/assoluto/flash-computer-use/run-mcp.sh'
+  "Flash computer use" -- '/absolute/path/to/flash-computer-use/run-mcp.sh'
 ```
 
 ---
 
-## 5. Variabili d'ambiente e parametri di configurazione
+## 6. Environment Variables Reference
 
-Un template completo è disponibile in [`.env.example`](.env.example).
+See [`.env.example`](.env.example) for a complete template.
 
-| Variabile | Default | Descrizione |
+| Variable | Default | Description |
 |---|---|---|
-| `D1_PROVIDER` | `local` | Provider di inferenza: `ollama`, `local` (Transformers) o `api` |
-| `D1_MODEL_NAME` | `d1:3b` / `LiquidAI/d1-3B` | Nome modello su Ollama (`d1:3b`) o HuggingFace / Cloud API |
-| `D1_OLLAMA_BASE_URL` | `http://localhost:11434` | Indirizzo del server Ollama |
-| `D1_OLLAMA_KEEP_ALIVE` | `10m` | Durata di permanenza del modello in VRAM/RAM |
-| `D1_API_BASE_URL` | — | URL endpoint `/v1/systemone` quando `D1_PROVIDER=api` |
-| `D1_API_KEY` | — | Chiave di autenticazione per `D1_PROVIDER=api` |
-| `D1_TIMEOUT_SECONDS` | `60` | Timeout massimo per chiamata al provider |
-| `D1_BROWSER_STRATEGY` | `hybrid` | `hybrid`: DOM istantaneo + fallback visivo D1; `vision`: usa sempre D1 |
-| `D1_DESKTOP_STRATEGY` | `hybrid` | `hybrid`: Accessibilità nativa SO + fallback D1; `vision`: usa sempre D1 |
-| `D1_IMAGE_MAX_SIDE` | `768` | Lato massimo in pixel delle immagini inviate a D1 (`0` disabilita il resize) |
-| `D1_CONFIDENCE_THRESHOLD` | `0.65` | Confidenza minima richiesta prima di eseguire un click |
-| `D1_BROWSER_HEADLESS` | `false` | `false` mostra la finestra del browser; `true` esegue in background |
-| `D1_BROWSER_CDP_URL` | — | Endpoint CDP opzionale (es. `http://localhost:9222`) per collegarsi a un browser già aperto |
-| `D1_BROWSER_PAGE_URL` | — | URL esatto della scheda da usare se CDP espone più schede |
-| `D1_MONITOR` | `1` | Indice del monitor MSS da catturare in modalità `desktop` |
-| `D1_REAL_MOUSE` | `true` | Sposta sempre il puntatore fisico reale del SO anche durante le azioni sul browser visibile (`false` per disattivare, `always` anche in headless) |
-| `D1_MOUSE_DURATION` | `0.04` | Durata in secondi del movimento umano minimum-jerk del puntatore |
+| `D1_PROVIDER` | `local` | Decision provider: `ollama`, `local` (Transformers), or `api` |
+| `D1_MODEL_NAME` | `d1:3b` / `LiquidAI/d1-3B` | Model identifier for Ollama (`d1:3b`) or Hugging Face / API |
+| `D1_OLLAMA_BASE_URL` | `http://localhost:11434` | Ollama server base URL |
+| `D1_OLLAMA_KEEP_ALIVE` | `10m` | Keeps the model warm in memory between tool calls |
+| `D1_API_BASE_URL` | — | Base URL for `/v1/systemone` when `D1_PROVIDER=api` |
+| `D1_API_KEY` | — | Bearer API key when `D1_PROVIDER=api` |
+| `D1_TIMEOUT_SECONDS` | `60` | Provider HTTP timeout in seconds |
+| `D1_BROWSER_STRATEGY` | `hybrid` | `hybrid` (fast DOM + D1 fallback) or `vision` (always D1) |
+| `D1_DESKTOP_STRATEGY` | `hybrid` | `hybrid` (native OS accessibility + D1 fallback) or `vision` |
+| `D1_IMAGE_MAX_SIDE` | `768` | Max image dimension sent to D1 (`0` disables downscaling) |
+| `D1_CONFIDENCE_THRESHOLD` | `0.65` | Minimum confidence required to authorize a click |
+| `D1_BROWSER_HEADLESS` | `false` | `false` for visible browser window, `true` for headless |
+| `D1_BROWSER_CDP_URL` | — | Optional CDP endpoint (e.g. `http://localhost:9222`) to attach to an existing browser |
+| `D1_BROWSER_PAGE_URL` | — | Exact tab URL to select when CDP exposes multiple tabs |
+| `D1_MONITOR` | `1` | MSS monitor index for desktop screen capture |
+| `D1_REAL_MOUSE` | `true` | Always move the real physical OS mouse cursor during visible browser actions (`false` to disable, `always` to force even in headless) |
+| `D1_MOUSE_DURATION` | `0.04` | Default duration (in seconds) of the human-like minimum-jerk pointer trajectory |
 
 ---
 
-## 6. Elenco completo dei 15 Tool MCP
+## 7. Complete Reference of All 15 MCP Tools
 
-Tutti i tool sono serializzati tramite lock asincrono e restituiscono JSON compatti con il tempo di esecuzione `elapsed_ms`.
+Every tool call is serialized via an async lock and returns compact structured JSON including execution time (`elapsed_ms`).
 
-### Browser & Navigazione
-1. **`browser_open(url)`**: apre un URL e restituisce titolo, stato `ready`, elenco delle etichette dei campi di input, anteprima testuale ed eventuali popup visibili.
-2. **`handle_popup(action="inspect" | "reject" | "accept" | "dismiss", max_scrolls=8)`**: ispeziona o gestisce banner cookie, dialog modali e pagine di consenso (scorrendo automaticamente i termini se il pulsante si abilita a fondo testo).
-3. **`browser_scroll(direction="down" | "up", pixels=600, container="auto" | "popup" | "page")`**: scorre il contenitore del popup attivo o la pagina principale.
+### Browser & Popup Navigation
+1. **`browser_open(url)`**: Opens a URL and returns page title, `ready` status, accessible input field labels, short text preview, and any detected popup/cookie banner details.
+2. **`handle_popup(action="inspect" | "reject" | "accept" | "dismiss", max_scrolls=8)`**: Inspects or resolves cookie banners, modal dialogs, and Google/YouTube consent pages (automatically scrolling terms if the action button is disabled until the bottom).
+3. **`browser_scroll(direction="down" | "up", pixels=600, container="auto" | "popup" | "page")`**: Scrolls the active popup container or the main page.
 
-### Azioni Intelligenti (`mode="browser"` oppure `mode="desktop"`)
-4. **`smart_click(target_description, mode="browser", double_click=False)`**: individua l'elemento (tramite DOM/accessibilità o Set-of-Mark / griglia gerarchica D1), muove il puntatore fisico lungo una curva umana e clicca sul punto non ostruito.
-5. **`smart_move(target_description, mode="desktop")`**: individua l'elemento e vi posiziona il puntatore del mouse senza cliccare (hover).
-6. **`smart_type(target_description, text_to_type, press_enter=True, mode="browser")`**: seleziona un campo di testo editabile, sostituisce il contenuto precedente, verifica che il testo sia stato scritto correttamente (`typed_verified=true`) e preme Invio.
-7. **`scroll_until_visible(target_description, direction="down", max_scrolls=8, mode="browser")`**: scorre gradualmente finché il bersaglio non è visibile con probabilità $\ge 0.80$.
-8. **`visual_assert(questions, mode="browser")`**: valuta da 1 a 64 domande binarie sullo stato visivo corrente in una sola chiamata.
-9. **`wait_until_ready(timeout_seconds=10, mode="browser")`**: attende la stabilità del DOM o la conferma visiva che l'interfaccia sia pronta.
-10. **`desktop_inspect()`**: restituisce informazioni di portabilità sul sistema operativo, l'elenco degli elementi accessibili del desktop e le coordinate del foglio di disegno (`canvas_bounds`).
+### Smart Hybrid Actions (`mode="browser"` or `mode="desktop"`)
+4. **`smart_click(target_description, mode="browser", double_click=False)`**: Locates the target via DOM/accessibility or Set-of-Mark / hierarchical D1 grid, moves the real physical pointer along a human curve, and clicks an unoccluded point.
+5. **`smart_move(target_description, mode="desktop")`**: Locates the target and moves the mouse pointer onto it without clicking (hover).
+6. **`smart_type(target_description, text_to_type, press_enter=True, mode="browser")`**: Filters editable fields, replaces existing text, verifies the exact typed value (`typed_verified=true`), and optionally presses Enter.
+7. **`scroll_until_visible(target_description, direction="down", max_scrolls=8, mode="browser")`**: Scrolls step-by-step until $P(\text{visible}) \ge 0.80$.
+8. **`visual_assert(questions, mode="browser")`**: Evaluates 1–64 binary visual questions in a single D1 call. Probabilities between `0.20` and `0.80` return `answer=null, certain=false`.
+9. **`wait_until_ready(timeout_seconds=10, mode="browser")`**: Fast DOM readiness check in `hybrid` mode or visual polling $P(\text{ready}) \ge 0.80$ in `vision`/`desktop` mode.
+10. **`desktop_inspect()`**: Returns OS portability status, visible native accessibility elements, and auto-detected drawing sheet bounds (`canvas_bounds`).
 
-### Controllo Diretto del Mouse e Disegno (`Paint` / `Canvas`)
-11. **`mouse_move(x, y, duration=0.04, mode="desktop")`**: muove il puntatore alle coordinate `(x, y)` con traiettoria umana minimum-jerk.
-12. **`mouse_click(x=None, y=None, button="left", double_click=False, mode="desktop")`**: esegue un click (`left`, `right`, `middle`) sul posto o dopo essersi spostato in `(x, y)`.
-13. **`mouse_drag(start_x, start_y, end_x, end_y, button="left", duration=0.12, mode="desktop")`**: porta il mouse su `(start_x, start_y)`, tiene premuto il pulsante, trascina fluidamente fino a `(end_x, end_y)` e rilascia il tasto.
-14. **`draw_path(points, canvas_bounds=None, duration=0.4, mode="desktop")`**: disegna sul foglio trascinando il mouse. Accetta sia un singolo tratto `[[x, y], ...]` sia **tratti multipli** `[[[x, y], ...], ...]` (sollevando il tasto del mouse tra un tratto e l'altro). Se `canvas_bounds` è omesso, rileva automaticamente il foglio di disegno.
-15. **`draw_shape(shape, x=None, y=None, width=None, height=None, canvas_bounds=None, duration=0.4, mode="desktop")`**: disegna una forma geometrica pronta sul foglio attivo (centrandola automaticamente se `x, y, width, height` o `canvas_bounds` vengono omessi).
-
----
-
-## 7. Uso con programmi di disegno (Paint, KolourPaint, Canvas Web)
-
-**Flash computer use** è progettato per interagire con applicazioni di grafica come farebbe una persona:
-
-- **Rilevamento automatico del foglio (`canvas_bounds`)**: quando apri Paint, KolourPaint, Pinta o una pagina web con `<canvas>`, non serve calcolare manualmente i bordi del foglio. Il server individua automaticamente l'area di disegno più ampia (tramite ruolo di accessibilità o analisi istogramma rettangolare dello screenshot).
-- **Interpolazione continua dei tratti**: durante il trascinamento, i segmenti lunghi vengono suddivisi in passi ravvicinati (~6–8 px) così che il pennello di Paint tracci linee continue senza interruzioni o punti saltati.
-- **Forme supportate da `draw_shape`**:
-  - `line`, `rectangle`, `ellipse`, `circle`, `triangle`, `diamond`, `star`, `arrow`, `heart`, `house`, `spiral`, `wave`.
-- **Rilascio sicuro del pulsante**: ogni operazione di trascinamento e disegno garantisce il rilascio del pulsante del mouse (`mouseUp`) in un blocco `finally`, anche in caso di errore.
+### Direct Mouse Control & Paint / Canvas Drawing
+11. **`mouse_move(x, y, duration=0.04, mode="desktop")`**: Moves the pointer to `(x, y)` along a minimum-jerk human curve without clicking.
+12. **`mouse_click(x=None, y=None, button="left", double_click=False, mode="desktop")`**: Clicks (`left`, `right`, `middle`) at the current cursor position or after moving to `(x, y)`.
+13. **`mouse_drag(start_x, start_y, end_x, end_y, button="left", duration=0.12, mode="desktop")`**: Moves to `(start_x, start_y)`, presses the mouse button, drags smoothly along an interpolated path to `(end_x, end_y)`, and safely releases.
+14. **`draw_path(points, canvas_bounds=None, duration=0.4, mode="desktop")`**: Draws by dragging the mouse across the canvas sheet. Supports both a single polyline `[[x, y], ...]` and **multi-stroke drawings** `[[[x, y], ...], ...]` (lifting the mouse button between strokes). When `canvas_bounds` is omitted, automatically detects the active Paint sheet or `<canvas>`.
+15. **`draw_shape(shape, x=None, y=None, width=None, height=None, canvas_bounds=None, duration=0.4, mode="desktop")`**: Draws a geometric shape (`line`, `rectangle`, `ellipse`, `circle`, `triangle`, `diamond`, `star`, `arrow`, `heart`, `house`, `spiral`, `wave`). Automatically detects the canvas and centers the shape when bounds or coordinates are omitted.
 
 ---
 
-## 8. Supporto Multi-Piattaforma (Linux, Windows, macOS)
+## 8. Drawing in Paint, KolourPaint & Web Canvas
 
-| Sistema Operativo | Accessibilità Nativa | Gestione Coordinate e DPI | Digitazione Testo |
+**Flash computer use** can control raster and vector drawing applications just like a human user:
+
+- **Automatic Drawing Sheet Detection (`canvas_bounds`)**: You do not need to manually measure the canvas coordinates. The server inspects accessibility roles (`canvas`, `drawing area`) and falls back to a fast largest-rectangle histogram detector (`detect_canvas_from_image`) that locates the white/light drawing sheet inside Paint, KolourPaint, Pinta, or browser `<canvas>` apps.
+- **Anti-Gap Stroke Interpolation**: Fast mouse drags in Paint often leave dotted gaps if points are far apart. `interpolate_stroke` subdivides long segments into dense ~`6–8 px` steps while preserving exact sharp corners.
+- **12 Built-In Shapes (`draw_shape`)**: `line`, `rectangle`, `ellipse`, `circle`, `triangle`, `diamond`, `star`, `arrow`, `heart`, `house`, `spiral`, `wave`.
+- **Guaranteed `mouseUp` Safety**: Every drag and drawing operation wraps pointer state in a `try ... finally` block so the mouse button is never left held down on error.
+
+---
+
+## 9. Cross-Platform Support (Linux, Windows, macOS)
+
+| Operating System | Native Accessibility Backend | Coordinate & DPI Scaling | Unicode Text Input |
 |---|---|---|---|
-| **Linux (X11)** | AT-SPI (`gi.repository.Atspi`) | Coordinate X11 dirette | Appunti `xclip` / `xsel` + `Ctrl+V` o fallback `pyautogui.write` |
-| **Windows** | UI Automation (`pywinauto` / PowerShell UIA) | Attivazione automatica Per-Monitor DPI Awareness (`shcore` / `user32`) | Appunti `Set-Clipboard` + `Ctrl+V` o fallback `pyautogui.write` |
-| **macOS** | Accessibility API (`ApplicationServices` / `osascript`) | Riscalatura automatica tra pixel fisici Retina (`mss`) e punti logici (`pyautogui`) | Appunti `pbcopy` + `Cmd+V` o fallback `pyautogui.write` |
+| **Linux (X11)** | AT-SPI (`gi.repository.Atspi`) | Direct X11 screen coordinates | `xclip` / `xsel` clipboard + `Ctrl+V` or `pyautogui.write` fallback |
+| **Windows** | UI Automation (`pywinauto` / PowerShell UIA) | Automatic Per-Monitor DPI Awareness (`shcore` / `user32`) | `Set-Clipboard` + `Ctrl+V` or `pyautogui.write` fallback |
+| **macOS** | Accessibility API (`ApplicationServices` / `osascript`) | Automatic Retina physical-to-logical scaling (`mss` ↔ `pyautogui`) | `pbcopy` + `Cmd+V` or `pyautogui.write` fallback |
 
 ---
 
-## 9. Test e Benchmark
+## 🧪 Running the Test Suite
 
-Per eseguire l'intera suite di test automatici (68 test che coprono protocollo MCP stdio, motore D1, browser headless, disegno su `<canvas>`, traiettorie umane del mouse e portabilità multi-OS):
+Run all 68 automated unit and integration tests (covering MCP stdio protocol, D1 HTTP contract, DOM & accessibility targeting, popup handling, human mouse trajectories, and real HTML5 `<canvas>` drawing):
 
 ```bash
 .venv/bin/python -m pytest -q
 ```
 
-I dettagli sui benchmark di velocità e precisione sono documentati in [`benchmarks/REPORT.md`](benchmarks/REPORT.md).
-
 ---
 
-## Licenza
+## 📄 License
 
-Distribuito sotto licenza [MIT](LICENSE).
+Released under the [MIT License](LICENSE).

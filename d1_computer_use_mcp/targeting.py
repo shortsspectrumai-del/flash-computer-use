@@ -29,7 +29,7 @@ def match_dom_target(target,elements):
         aliases={normalize(a) for a in element.get('aliases',[element['label']]) if a}
         alias_cores={_strip_stopwords(a) for a in aliases if a}
         exact=query in aliases or (len(query_core)>=4 and query_core in alias_cores)
-        # A quoted accessible label can omit a domain suffix or preposition, e.g. "Cerca in Amazon" vs "Cerca Amazon.it".
+        # A quoted accessible label can omit a domain suffix or preposition, e.g. "Search in Amazon" vs "Search Amazon.com".
         named=any(
             a==q or (len(q)>=6 and a.startswith(q+' '))
             for q in quoted for a in aliases
@@ -41,7 +41,7 @@ def match_dom_target(target,elements):
             matches.append(element)
     if matches:
         return matches[0] if len(matches)==1 else None
-    # Generic search-bar requests may use a unique searchbox role; specific content queries (e.g. "cerca recensioni") may not.
+    # Generic search-bar requests may use a unique searchbox role; specific content queries (e.g. "search reviews") may not.
     is_search_bar_query=(
         query in SEARCH_BAR_TERMS
         or any(query.startswith(term+' ') for term in SEARCH_BAR_TERMS if term!='search')

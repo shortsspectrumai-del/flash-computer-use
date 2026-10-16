@@ -1,31 +1,8 @@
 {
   "runs": [
     {
-      "ready_seconds": 0.007,
-      "type_seconds": 0.251,
-      "ready": {
-        "status": "ready",
-        "method": "dom"
-      },
-      "type": {
-        "status": "ok",
-        "clicked_coordinates": [
-          353,
-          43
-        ],
-        "confidence": 1.0,
-        "confidence_source": "dom_unique_match",
-        "method": "dom",
-        "typed_verified": true,
-        "typed_characters": 28,
-        "ui_changed": true
-      },
-      "correct": true,
-      "inferences": []
-    },
-    {
-      "ready_seconds": 0.003,
-      "type_seconds": 0.209,
+      "ready_seconds": 0.006,
+      "type_seconds": 0.446,
       "ready": {
         "status": "ready",
         "method": "dom"
@@ -48,7 +25,30 @@
     },
     {
       "ready_seconds": 0.002,
-      "type_seconds": 0.177,
+      "type_seconds": 0.22,
+      "ready": {
+        "status": "ready",
+        "method": "dom"
+      },
+      "type": {
+        "status": "ok",
+        "clicked_coordinates": [
+          353,
+          43
+        ],
+        "confidence": 1.0,
+        "confidence_source": "dom_unique_match",
+        "method": "dom",
+        "typed_verified": true,
+        "typed_characters": 28,
+        "ui_changed": true
+      },
+      "correct": true,
+      "inferences": []
+    },
+    {
+      "ready_seconds": 0.002,
+      "type_seconds": 0.181,
       "ready": {
         "status": "ready",
         "method": "dom"

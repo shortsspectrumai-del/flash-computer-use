@@ -5,11 +5,50 @@ build-backend = "hatchling.build"
 [project]
 name = "d1-computer-use-mcp"
 version = "0.1.0"
-description = "Flash computer use: fast hybrid visual & accessibility computer-use MCP server with human-like pointer control and canvas drawing"
+description = "Flash computer use: ultra-fast hybrid visual & accessibility computer-use MCP server with human-like physical mouse movement, browser/desktop automation, and Paint/canvas drawing"
 readme = "README.md"
 license = {text = "MIT"}
 requires-python = ">=3.11"
+keywords = [
+    "mcp",
+    "mcp-server",
+    "model-context-protocol",
+    "computer-use",
+    "gui-agent",
+    "browser-automation",
+    "desktop-automation",
+    "playwright",
+    "pyautogui",
+    "ollama",
+    "liquid-ai",
+    "d1",
+    "vision-language-model",
+    "accessibility",
+    "human-mouse",
+    "canvas-drawing",
+    "cursor",
+    "claude-desktop",
+    "codex",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: MacOS",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development :: Testing",
+]
 dependencies = ["mcp[cli]>=1.10,<2", "httpx>=0.27", "pillow>=10", "playwright>=1.49", "mss>=9", "pyautogui>=0.9.54"]
+
+[project.urls]
+Homepage = "https://github.com/shortsspectrumai-del/flash-computer-use"
+Repository = "https://github.com/shortsspectrumai-del/flash-computer-use"
+Issues = "https://github.com/shortsspectrumai-del/flash-computer-use/issues"
 
 [project.optional-dependencies]
 local = ["torch", "torchvision", "transformers>=5.14"]

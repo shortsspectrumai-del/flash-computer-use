@@ -16,14 +16,14 @@ async def main():
     report={}
     try:
         start=time.perf_counter()
-        report['open']=await browser.open('https://www.amazon.it/')
+        report['open']=await browser.open('https://www.amazon.com/')
         report['open_seconds']=round(time.perf_counter()-start,3)
         candidates=await browser.candidates()
         report['visible_input_labels']=[e['label'] for e in candidates if e['editable']]
         labels=[e['label'] for e in report['open'].get('input_fields',[]) if e['role']=='searchbox']
-        target='"'+labels[0]+'"' if len(labels)==1 else 'barra di ricerca di Amazon in alto (campo "Cerca in Amazon")'
+        target='"'+labels[0]+'"' if len(labels)==1 else 'top Amazon search bar (field "Search Amazon")'
         start=time.perf_counter()
-        report['search']=await ComputerUse(engine,browser,None).smart_type(target,'taglia capelli professionale',True)
+        report['search']=await ComputerUse(engine,browser,None).smart_type(target,'professional hair clipper',True)
         report['search_seconds']=round(time.perf_counter()-start,3)
         try:
             if report['open']['status']=='blocked':
@@ -36,7 +36,7 @@ async def main():
             report['results_ready']=await ComputerUse(engine,browser,None).wait_until_ready(timeout_seconds=10)
             report['results_ready_seconds']=round(time.perf_counter()-start,3)
         report['final_url']=browser.page.url
-        report['submitted']= '/s?' in browser.page.url and 'taglia' in browser.page.url
+        report['submitted']='/s?' in browser.page.url and 'clipper' in browser.page.url
         print(json.dumps(report,indent=2),flush=True)
         Path('benchmarks/amazon-after.json').write_text(json.dumps(report,indent=2)+'\n')
     finally:

@@ -14,9 +14,11 @@ Unlike traditional screenshot-only computer-use agents that take 20–50 seconds
 
 ## ✨ Key Highlights
 
-- 🚀 **Up to 200× Faster Hybrid Execution (`hybrid` mode)**:
-  - **Browser**: Instantly resolves unique accessible labels and `searchbox` roles via DOM inspection in **2–7 ms** and verifies unoccluded click points (`elementFromPoint` multi-point hit-testing), falling back to D1 vision only when targets are ambiguous.
-  - **Desktop**: Queries native OS accessibility trees (**Linux AT-SPI**, **Windows UI Automation**, **macOS AXUIElement**) with automatic cache invalidation, bypassing screenshot capture and VLM inference whenever an exact accessible control exists.
+- 🚀 **Up to 200× Faster Hybrid Execution & Deep DOM ↔ D1 Synergy (`hybrid` mode)**:
+  - **Context & Spatial DOM Disambiguation**: Instantly resolves unique accessible labels, child SVG/image icon labels, `<select>` dropdown options, and even duplicate buttons across product cards or page zones (e.g. `"Select Plan for Enterprise Suite"` or `"Sign in button in the header"`) in **2–7 ms** (`0` VLM calls), verifying unoccluded click coordinates via 9-point `elementFromPoint` hit-testing.
+  - **Smart Candidate Pre-Filtering & Cropping for D1**: When visual disambiguation is needed on dense pages (60+ elements), `select_d1_candidates` narrows the Set-of-Mark annotation to only the relevant candidate subset, crops tightly around them, places non-occluding exterior badges, and enriches each option with `[role | zone | card context]`.
+  - **Hybrid Offscreen Scrolling (`scroll_until_visible`)**: Detects offscreen DOM targets below the fold and scrolls directly until they enter the viewport without wasting intermediate VLM calls.
+  - **Desktop Native Accessibility**: Queries native OS accessibility trees (**Linux AT-SPI**, **Windows UI Automation**, **macOS AXUIElement**) with automatic cache invalidation.
 - 🖱️ **Human-Like Physical OS Mouse Movement (Web + Desktop)**:
   - Always moves the real physical OS cursor along a **minimum-jerk trajectory** ($10t^3 - 15t^4 + 6t^5$) with a subtle natural wrist arc and exact pixel landing.
   - In visible browser mode, automatically maps Playwright viewport coordinates to global screen coordinates before every click, typing action, scroll, drag, or popup action.
